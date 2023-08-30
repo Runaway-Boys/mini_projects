@@ -1,4 +1,5 @@
 
+from typing import Any, Dict
 from django.shortcuts import render
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -19,6 +20,14 @@ from django.contrib.auth import login
 
 
 # Create your views here.
+class CustomLoginView(LoginView):
+    template_name = 'base/login.html'
+    fields = '__all__'
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        return reverse_lazy('scorecards')
+
 
 class RegisterPage(FormView):
     template_name = 'base/register.html'
@@ -39,6 +48,12 @@ class RegisterPage(FormView):
 class ScoreCardList(ListView):
     model = ScoreCards
     context_object_name = 'scorecards'
+
+    def get_context_data(self, **kwargs) :
+        context= super().get_context_data(**kwargs)
+        context['scorecards'] = context['scorecards'].filter(name__user=self.request.user)
+        return context
+
 class ScoreCardViews(DetailView):
     model = ScoreCards
     context_object_name = 'scorecards'
